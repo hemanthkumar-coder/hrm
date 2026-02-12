@@ -9,9 +9,11 @@ const db = require('./db');
 const app = express();
 const server = http.createServer(app);
 
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173',
+        origin: CLIENT_URL,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true,
     },
@@ -21,7 +23,7 @@ const io = new Server(server, {
 app.set('io', io);
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(express.json());
 
 // Routes

@@ -43,18 +43,24 @@ This guide explains how to deploy the HRM Portal completely for **free** using *
 4. Configure the service:
    - **Name:** `hrm-portal` (or any name)
    - **Region:** Closest to you (e.g., Singapore, Frankfurt, Oregon)
-   - **Branch:** `master` (or main)
+   - **Branch:** `master` (or `main`)
    - **Runtime:** `Node`
-   - **Build Command:** `npm run install-all && npm run build`
-     *(This installs dependencies for both client/server and builds the React app)*
+   - **Root Directory:** *(leave blank)*
+   - **Build Command:** `npm run build`
    - **Start Command:** `npm start`
    - **Instance Type:** `Free`
 
-5. **Environment Variables** (Click "Advanced"):
+5. **Environment Variables** (Click "Advanced" or go to Environment tab):
    Add the following keys:
-   - `DATABASE_URL`: (Paste your Neon Connection String from Step 2)
-   - `JWT_SECRET`: (Enter a random secret key, e.g., `my-super-secret-key-123`)
-   - `NODE_ENV`: `production`
+
+   | Key | Value |
+   |-----|-------|
+   | `DATABASE_URL` | Your Neon connection string from Step 2 |
+   | `JWT_SECRET` | A random secret key, e.g. `my-super-secret-key-123` |
+   | `NODE_ENV` | `production` |
+   | `CLIENT_URL` | Your Render app URL, e.g. `https://hrm-portal.onrender.com` |
+
+   > **Note:** You will get your `CLIENT_URL` after the first deploy. You can add/update this env var after the initial deploy — just trigger a redeploy after setting it.
 
 6. Click **Create Web Service**.
 
@@ -63,4 +69,12 @@ This guide explains how to deploy the HRM Portal completely for **free** using *
 ## Step 4: Verification
 - Render will start building your app. It might take a few minutes.
 - Once finished, it will provide a URL (e.g., `https://hrm-portal.onrender.com`).
+- Go to the **Environment** tab and set `CLIENT_URL` to that URL if you haven't already, then trigger a manual redeploy.
 - Open the URL. You should see your live application!
+
+---
+
+## How It Works
+- **Build step:** `npm run build` installs all dependencies (root, client, server) and runs `vite build` to create the production client bundle in `client/dist/`.
+- **Start step:** `npm start` runs the Express server, which serves the built client files and exposes the API on the same port.
+- Since the client and server share the same origin, API calls use relative URLs (`/api/...`) and no CORS issues arise.

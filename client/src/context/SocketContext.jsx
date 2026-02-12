@@ -29,7 +29,7 @@ export function SocketProvider({ children }) {
 
         fetchUnreadMessages();
 
-        const newSocket = io('http://localhost:5000', {
+        const newSocket = io({
             auth: { token },
             transports: ['websocket', 'polling'],
         });
