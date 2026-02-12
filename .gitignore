@@ -23,7 +23,6 @@ yarn-error.log*
 Thumbs.db
 
 # Database backups (contain sensitive data)
-*.sql
 backup.sql
 server/backup.sql
 
