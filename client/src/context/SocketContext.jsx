@@ -13,6 +13,26 @@ export function SocketProvider({ children }) {
     const [unreadMessages, setUnreadMessages] = useState(0); // Chat messages
     const [toasts, setToasts] = useState([]);
 
+    // Use Service Worker notifications for mobile compatibility
+    const showPushNotification = async (title, options = {}) => {
+        try {
+            const reg = await navigator.serviceWorker?.ready;
+            if (reg) {
+                await reg.showNotification(title, {
+                    ...options,
+                    badge: '/vite.svg',
+                    vibrate: [200, 100, 200],
+                    tag: options.tag || 'hrm-notification',
+                    renotify: true
+                });
+            } else {
+                new Notification(title, options);
+            }
+        } catch {
+            try { new Notification(title, options); } catch { /* silent */ }
+        }
+    };
+
     useEffect(() => {
         if (!token || !user) {
             if (socket) {
@@ -55,7 +75,7 @@ export function SocketProvider({ children }) {
             addToast(data.title, data.type || 'info');
 
             if (document.hidden && Notification.permission === 'granted') {
-                new Notification(data.title, {
+                showPushNotification(data.title, {
                     body: data.message || 'New system notification',
                     icon: '/vite.svg'
                 });
@@ -63,13 +83,12 @@ export function SocketProvider({ children }) {
         });
 
         newSocket.on('new_message', (data) => {
-            // Only increment if we are not the sender
             if (data.senderId !== user.id) {
                 setUnreadMessages(prev => prev + 1);
                 addToast(`New message from ${data.senderName}`, 'info');
 
                 if (document.hidden && Notification.permission === 'granted') {
-                    new Notification(`New message from ${data.senderName}`, {
+                    showPushNotification(`New message from ${data.senderName}`, {
                         body: data.content,
                         icon: data.senderAvatar || '/vite.svg'
                     });
@@ -81,7 +100,7 @@ export function SocketProvider({ children }) {
             const msg = `${data.name} ${data.type === 'clock_in' ? 'clocked in' : 'clocked out'}`;
             addToast(msg, 'info');
             if (document.hidden && Notification.permission === 'granted') {
-                new Notification('Attendance Update', {
+                showPushNotification('Attendance Update', {
                     body: msg,
                     icon: '/vite.svg'
                 });

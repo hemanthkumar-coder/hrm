@@ -90,22 +90,18 @@ async function initDB() {
         const users = await db.query('SELECT COUNT(*) FROM users');
         if (parseInt(users.rows[0].count) === 0) {
             const bcrypt = require('bcryptjs');
-            const hashedPassword = await bcrypt.hash('admin123', 10);
+            const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+            const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
             await db.query(`
         INSERT INTO users (id, email, password, first_name, last_name, role) VALUES
-          ('a0000000-0000-0000-0000-000000000001', 'admin@hrm.com', $1, 'Admin', 'User', 'admin'),
-          ('a0000000-0000-0000-0000-000000000002', 'hr@hrm.com', $1, 'Sarah', 'Johnson', 'hr'),
-          ('a0000000-0000-0000-0000-000000000006', 'manager@hrm.com', $1, 'Robert', 'Chen', 'manager'),
-          ('a0000000-0000-0000-0000-000000000003', 'john@hrm.com', $1, 'John', 'Smith', 'employee'),
-          ('a0000000-0000-0000-0000-000000000004', 'jane@hrm.com', $1, 'Jane', 'Doe', 'employee'),
-          ('a0000000-0000-0000-0000-000000000005', 'mike@hrm.com', $1, 'Mike', 'Wilson', 'employee')
+          ('a0000000-0000-0000-0000-000000000001', 'admin@hrm.com', $1, 'Admin', 'User', 'admin')
         ON CONFLICT (email) DO NOTHING
       `, [hashedPassword]);
 
             await db.query(`
         INSERT INTO departments (id, name, description, manager_id) VALUES
-          ('d0000000-0000-0000-0000-000000000001', 'Engineering', 'Software development and architecture', 'a0000000-0000-0000-0000-000000000006'),
+          ('d0000000-0000-0000-0000-000000000001', 'Engineering', 'Software development and architecture', NULL),
           ('d0000000-0000-0000-0000-000000000002', 'Human Resources', 'People operations and talent management', NULL),
           ('d0000000-0000-0000-0000-000000000003', 'Marketing', 'Brand management and growth', NULL),
           ('d0000000-0000-0000-0000-000000000004', 'Finance', 'Financial planning and accounting', NULL),
@@ -115,12 +111,7 @@ async function initDB() {
 
             await db.query(`
         INSERT INTO employees (id, user_id, employee_id, department_id, designation, phone, salary, date_of_joining) VALUES
-          ('e0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'EMP001', 'd0000000-0000-0000-0000-000000000001', 'CTO', '+1-555-0101', 150000, '2020-01-15'),
-          ('e0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'EMP002', 'd0000000-0000-0000-0000-000000000002', 'HR Manager', '+1-555-0102', 95000, '2020-03-10'),
-          ('e0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000006', 'EMP006', 'd0000000-0000-0000-0000-000000000001', 'Engineering Manager', '+1-555-0106', 130000, '2020-06-01'),
-          ('e0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003', 'EMP003', 'd0000000-0000-0000-0000-000000000001', 'Senior Developer', '+1-555-0103', 120000, '2021-06-01'),
-          ('e0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000004', 'EMP004', 'd0000000-0000-0000-0000-000000000003', 'Marketing Lead', '+1-555-0104', 85000, '2022-01-20'),
-          ('e0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000005', 'EMP005', 'd0000000-0000-0000-0000-000000000004', 'Financial Analyst', '+1-555-0105', 80000, '2023-04-12')
+          ('e0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'EMP001', 'd0000000-0000-0000-0000-000000000001', 'CTO', '+1-555-0101', 150000, '2020-01-15')
         ON CONFLICT (employee_id) DO NOTHING
       `);
 
@@ -131,7 +122,7 @@ async function initDB() {
         ON CONFLICT (employee_id, year) DO NOTHING
       `);
 
-            console.log('Seed data inserted');
+            console.log('Admin user created');
         } else {
             // Run migrations for existing databases
             try {

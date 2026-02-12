@@ -42,7 +42,7 @@ export default function Login() {
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>Email Address</label>
-                        <input type="email" className="form-control" placeholder="admin@hrm.com" value={email} onChange={e => setEmail(e.target.value)} required />
+                        <input type="email" className="form-control" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required />
                     </div>
                     <div className="form-group">
                         <label>Password</label>
@@ -55,13 +55,6 @@ export default function Login() {
 
                 <div className="login-footer">
                     Don't have an account? <Link to="/register">Sign up</Link>
-                </div>
-
-                <div style={{ marginTop: 20, padding: '12px 16px', background: 'var(--accent-light)', borderRadius: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-                    <strong style={{ color: 'var(--accent-hover)' }}>Demo Credentials:</strong><br />
-                    Admin: admin@hrm.com / admin123<br />
-                    HR: hr@hrm.com / admin123<br />
-                    Employee: john@hrm.com / admin123
                 </div>
             </div>
         </div>

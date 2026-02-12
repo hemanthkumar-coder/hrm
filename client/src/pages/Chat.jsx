@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { Send, MessageCircle } from 'lucide-react';
+import { Send, MessageCircle, ArrowLeft } from 'lucide-react';
 
 export default function Chat() {
     const { apiFetch, user } = useAuth();
@@ -11,6 +11,7 @@ export default function Chat() {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [typing, setTyping] = useState(null);
+    const [mobileShowChat, setMobileShowChat] = useState(false);
     const messagesEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
 
@@ -22,7 +23,6 @@ export default function Chat() {
         const handleNewMessage = (msg) => {
             if (selectedContact && (msg.senderId === selectedContact.id || msg.receiverId === selectedContact.id)) {
                 setMessages(prev => [...prev, msg]);
-                // If message is from current contact, mark as read and update badge
                 if (msg.senderId === selectedContact.id) {
                     socket.emit('mark_read', { senderId: msg.senderId });
                     setTimeout(fetchUnreadMessages, 500);
@@ -68,6 +68,7 @@ export default function Chat() {
 
     const selectContact = async (contact) => {
         setSelectedContact(contact);
+        setMobileShowChat(true);
         try {
             const res = await apiFetch(`/messages/${contact.id}`);
             if (res.ok) {
@@ -75,6 +76,10 @@ export default function Chat() {
                 fetchUnreadMessages();
             }
         } catch (err) { console.error(err); }
+    };
+
+    const handleBackToContacts = () => {
+        setMobileShowChat(false);
     };
 
     const sendMessage = (e) => {
@@ -112,7 +117,7 @@ export default function Chat() {
     };
 
     return (
-        <div className="chat-layout animate-slide-up">
+        <div className={`chat-layout animate-slide-up ${mobileShowChat ? 'mobile-chat-active' : ''}`}>
             {/* Contacts */}
             <div className="chat-contacts">
                 <div className="chat-contacts-header">Messages</div>
@@ -145,6 +150,9 @@ export default function Chat() {
             {selectedContact ? (
                 <div className="chat-main">
                     <div className="chat-header">
+                        <button className="chat-back-btn" onClick={handleBackToContacts}>
+                            <ArrowLeft size={20} />
+                        </button>
                         <div className="chat-contact-avatar" style={{ width: 36, height: 36, fontSize: 13 }}>
                             {getInitials(selectedContact.firstName, selectedContact.lastName)}
                             {onlineUsers.has(selectedContact.id) && <div className="online-dot" style={{ width: 10, height: 10 }} />}

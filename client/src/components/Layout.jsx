@@ -5,7 +5,7 @@ import { useSocket } from '../context/SocketContext';
 import {
     LayoutDashboard, Users, Building2, Clock, CalendarDays,
     DollarSign, MessageCircle, Bell, User, LogOut, ChevronLeft,
-    ChevronRight, Search, ShieldCheck, FileText
+    ChevronRight, Search, ShieldCheck, FileText, Menu, X
 } from 'lucide-react';
 
 const navItems = [
@@ -27,6 +27,7 @@ const navItems = [
 
 export default function Layout({ children }) {
     const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
     const location = useLocation();
     const { user, logout } = useAuth();
     const { unreadCount, unreadMessages, toasts } = useSocket();
@@ -42,11 +43,17 @@ export default function Layout({ children }) {
 
     return (
         <div className="app-layout">
+            {/* Mobile Overlay */}
+            {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
+
             {/* Sidebar */}
-            <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+            <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
                 <div className="sidebar-logo">
                     <div className="logo-icon">HR</div>
                     <span className="logo-text">HRM Portal</span>
+                    <button className="mobile-close-btn" onClick={() => setMobileOpen(false)}>
+                        <X size={20} />
+                    </button>
                 </div>
 
                 <button className="sidebar-toggle" onClick={() => setCollapsed(!collapsed)}>
@@ -58,14 +65,13 @@ export default function Layout({ children }) {
                         if (item.section) {
                             return <div key={i} className="nav-section-title">{item.section}</div>;
                         }
-                        // Role-based filtering
                         if (item.roles && !item.roles.includes(user?.role)) {
                             return null;
                         }
                         const Icon = item.icon;
                         const isActive = location.pathname === item.path;
                         return (
-                            <Link key={item.path} to={item.path} className={`nav-item ${isActive ? 'active' : ''}`}>
+                            <Link key={item.path} to={item.path} className={`nav-item ${isActive ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>
                                 <Icon className="nav-icon" size={20} />
                                 <span className="nav-label">{item.label}</span>
                                 {item.path === '/notifications' && unreadCount > 0 && (
@@ -80,7 +86,7 @@ export default function Layout({ children }) {
                 </nav>
 
                 <div style={{ padding: '12px', borderTop: '1px solid var(--border)' }}>
-                    <button className="nav-item" onClick={logout} style={{ width: '100%', color: 'var(--danger)' }}>
+                    <button className="nav-item" onClick={() => { logout(); setMobileOpen(false); }} style={{ width: '100%', color: 'var(--danger)' }}>
                         <LogOut className="nav-icon" size={20} />
                         <span className="nav-label">Logout</span>
                     </button>
@@ -91,6 +97,9 @@ export default function Layout({ children }) {
             <div className={`main-area ${collapsed ? 'collapsed' : ''}`}>
                 <header className="header">
                     <div className="header-left">
+                        <button className="mobile-menu-btn" onClick={() => setMobileOpen(true)}>
+                            <Menu size={22} />
+                        </button>
                         <h1>{pageTitle}</h1>
                     </div>
                     <div className="header-right">
